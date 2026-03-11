@@ -37,9 +37,9 @@ const StudentDashboard = () => {
           {/* Main Content */}
           <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
             {/* Greeting */}
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-1">Hi, {user.name} !</h2>
-              <p className="text-gray-600">Welcome back to your student dashboard.</p>
+            <section className="mb-8 glass-card p-6">
+              <h2 className="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">Hi, {user.name}!</h2>
+              <p className="text-neutral-400">Welcome back to your student dashboard.</p>
             </section>
 
             {loading ? (
@@ -50,34 +50,42 @@ const StudentDashboard = () => {
               <>
                 {/* Attendance Summary Cards */}
                 <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-sm uppercase text-gray-500 tracking-wider">Total Present</h3>
-                    <p className="mt-2 text-3xl font-bold text-green-600">{totalPresent} Days</p>
+                  <div className="glass-card flex flex-col items-center justify-center p-6 bg-gradient-to-br from-neutral-800/10 to-neutral-800/20">
+                    <h3 className="text-xs uppercase font-bold text-neutral-400 tracking-widest drop-shadow-sm">Total Present</h3>
+                    <p className="mt-2 text-4xl font-black text-white drop-shadow-lg">{totalPresent}</p>
+                    <p className="text-xs text-neutral-500 mt-1 uppercase tracking-widest">Days</p>
                   </div>
-                  <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-sm uppercase text-gray-500 tracking-wider">Total Absent</h3>
-                    <p className="mt-2 text-3xl font-bold text-red-500">{totalAbsent} Days</p>
+                  <div className="glass-card flex flex-col items-center justify-center p-6 bg-gradient-to-br from-neutral-800/10 to-neutral-800/20">
+                    <h3 className="text-xs uppercase font-bold text-neutral-400 tracking-widest drop-shadow-sm">Total Absent</h3>
+                    <p className="mt-2 text-4xl font-black text-neutral-300 shadow-xl drop-shadow-lg">{totalAbsent}</p>
+                    <p className="text-xs text-neutral-500 mt-1 uppercase tracking-widest">Days</p>
                   </div>
-                  <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-sm uppercase text-gray-500 tracking-wider">Attendance Rate</h3>
-                    <p className="mt-2 text-3xl font-bold text-blue-600">{attendanceRate}%</p>
+                  <div className="glass-card flex flex-col items-center justify-center p-6 bg-gradient-to-br from-neutral-800/10 to-neutral-800/20">
+                    <h3 className="text-xs uppercase font-bold text-neutral-400 tracking-widest drop-shadow-sm">Attendance Rate</h3>
+                    <p className="mt-2 text-4xl font-black text-white drop-shadow-lg">{attendanceRate}%</p>
                   </div>
                 </section>
 
                 {/* Recent Attendance Log */}
-                <section className="bg-white p-6 rounded-lg shadow mb-8">
-                  <h3 className="text-lg font-semibold mb-4">Recent Attendance</h3>
+                <section className="glass-card mb-8">
+                  <h3 className="text-xl font-bold mb-6 tracking-wide drop-shadow-md text-white">Recent Attendance</h3>
                   <div className="space-y-4">
                     {attendanceData.slice(0, 5).map((entry, index) => {
-                      let color = "bg-gray-100 text-gray-800";
-                      if (entry.status === "Present") color = "bg-green-100 text-green-800";
-                      else if (entry.status === "Absent") color = "bg-red-100 text-red-800";
-                      else if (entry.status === "Late") color = "bg-yellow-100 text-yellow-800";
+                      let bgClass = "bg-white/5";
+                      let borderClass = "border-neutral-700 block";
+                      let textClass = "text-neutral-400";
+                      
+                      if (entry.status === "Present") {
+                        bgClass = "bg-white/10"; borderClass = "border-white/20"; textClass = "text-white";
+                      }
+                      else if (entry.status === "Absent") {
+                        bgClass = "bg-black/20"; borderClass = "border-neutral-800"; textClass = "text-neutral-500";
+                      }
 
                       return (
-                        <div key={index} className="flex justify-between items-center border-b pb-2">
-                          <span className="font-medium">{new Date(entry.date).toLocaleDateString()}</span>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${color}`}>
+                        <div key={index} className={`flex justify-between items-center p-4 rounded-2xl border ${bgClass} ${borderClass} transition-all hover:scale-[1.01]`}>
+                          <span className="font-semibold text-neutral-300">{new Date(entry.date).toLocaleDateString()}</span>
+                          <span className={`px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase ${textClass} border ${borderClass}`}>
                             {entry.status}
                           </span>
                         </div>
@@ -89,20 +97,16 @@ const StudentDashboard = () => {
             )}
 
             {/* Profile Info */}
-            <section className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">Your Info</h3>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-                <div>
-                  <dt className="text-sm text-gray-500">Name</dt>
-                  <dd className="font-medium">{user.name}</dd>
+            <section className="glass-card mb-8">
+              <h3 className="text-xl font-bold mb-6 tracking-wide drop-shadow-md text-white">Your Info</h3>
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl">
+                  <dt className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Name</dt>
+                  <dd className="font-semibold text-xl text-white">{user.name}</dd>
                 </div>
-                {/* <div>
-                  <dt className="text-sm text-gray-500">Roll No</dt>
-                  <dd className="font-medium">{user._id}</dd>
-                </div> */}
-                <div>
-                  <dt className="text-sm text-gray-500">Class</dt>
-                  <dd className="font-medium">{user.classId ? user.classId.name : ''}</dd>
+                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl">
+                  <dt className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Class</dt>
+                  <dd className="font-semibold text-xl text-white">{user.classId ? user.classId.name : 'Not Assigned'}</dd>
                 </div>
               </dl>
             </section>

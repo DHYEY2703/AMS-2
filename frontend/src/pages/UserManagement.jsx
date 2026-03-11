@@ -42,20 +42,20 @@ const UserManagement = () => {
   }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">User Management</h2>
-      <div className="mb-4">
+    <div className="glass-card flex flex-col gap-6 max-w-6xl mx-auto w-full">
+      <h2 className="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">User Management</h2>
+      <div className="flex gap-4 border-b border-white/10 pb-4">
         <button
-          className={`mr-4 px-4 py-2 rounded ${
-            activeTab === "teachers" ? "bg-blue-600 text-white" : "bg-gray-200"
+          className={`px-6 py-2 rounded-full font-bold tracking-widest uppercase text-xs transition-all ${
+            activeTab === "teachers" ? "glass-button shadow-none text-white outline outline-white/20" : "text-neutral-500 hover:text-white"
           }`}
           onClick={() => setActiveTab("teachers")}
         >
           Teachers
         </button>
         <button
-          className={`px-4 py-2 rounded ${
-            activeTab === "students" ? "bg-blue-600 text-white" : "bg-gray-200"
+          className={`px-6 py-2 rounded-full font-bold tracking-widest uppercase text-xs transition-all ${
+            activeTab === "students" ? "glass-button shadow-none text-white outline outline-white/20" : "text-neutral-500 hover:text-white"
           }`}
           onClick={() => setActiveTab("students")}
         >
@@ -66,20 +66,20 @@ const UserManagement = () => {
       {loading ? (
         <div>Loading {activeTab}...</div>
       ) : error ? (
-        <div className="text-red-600">{error}</div>
+        <div className="text-red-400 font-semibold">{error}</div>
       ) : users.length === 0 ? (
-        <div>No {activeTab} found.</div>
+        <div className="text-neutral-400 font-medium">No {activeTab} found.</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300 min-w-[600px]">
+        <div className="overflow-x-auto rounded-3xl border border-white/10 shadow-[8px_8px_32px_rgba(0,0,0,0.5)]">
+          <table className="w-full text-left border-collapse backdrop-blur-xl bg-neutral-900/40 min-w-[600px]">
             <thead>
-              <tr>
-                <th className="border border-gray-300 p-2">Name</th>
-                <th className="border border-gray-300 p-2">Email</th>
-                <th className="border border-gray-300 p-2">Class</th>
+              <tr className="bg-neutral-800/60 uppercase text-xs tracking-widest text-neutral-400 border-b border-white/10">
+                <th className="p-4 font-bold">Name</th>
+                <th className="p-4 font-bold">Email</th>
+                <th className="p-4 font-bold">Class</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {users.map((user) => {
                 let className = "N/A";
                 if (activeTab === "teachers") {
@@ -91,10 +91,10 @@ const UserManagement = () => {
                 }
 
                 return (
-                  <tr key={user._id}>
-                    <td className="border border-gray-300 p-2">{user.name}</td>
-                    <td className="border border-gray-300 p-2">{user.email}</td>
-                    <td className="border border-gray-300 p-2">{className}</td>
+                  <tr key={user._id} className="transition-colors hover:bg-white-[0.02]">
+                    <td className="p-4 font-semibold text-neutral-200">{user.name}</td>
+                    <td className="p-4 text-neutral-400">{user.email}</td>
+                    <td className="p-4 text-neutral-400">{className}</td>
                   </tr>
                 );
               })}

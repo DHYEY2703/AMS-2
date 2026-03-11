@@ -79,8 +79,8 @@ export const getDashboardData = async (req, res) => {
         {
           label: 'Attendance',
           data: attendanceData,
-          backgroundColor: 'rgba(75,192,192,0.4)',
-          borderColor: 'rgba(75,192,192,1)',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          borderColor: 'rgba(255,255,255,1)',
           fill: true,
         },
       ],

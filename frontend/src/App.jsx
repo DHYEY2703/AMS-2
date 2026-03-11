@@ -16,9 +16,14 @@ import MarkAttendance from "./pages/MarkAttendance";
 import AttendanceReport from "./pages/AttendanceReport";
 import Teachers from "./pages/Teachers";
 import ClassManagement from "./pages/ClassManagement";
+import SubjectManagement from "./pages/SubjectManagement";
 import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Profile from "./pages/Profile";
+import Leaves from "./pages/Leaves";
+import Timetable from "./pages/Timetable";
+import AuditLogs from "./pages/AuditLogs";
 
 const ProtectedRoute = ({ children }) => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -62,7 +67,7 @@ const AppContent = () => {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden text-neutral-100 bg-transparent">
       {/* Sidebar */}
       {authUser && (
         <Sidebar
@@ -73,7 +78,7 @@ const AppContent = () => {
       )}
       {authUser && sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 md:hidden bg-black/40 backdrop-blur-sm flex items-center justify-center text-white text-sm animate-fade-in"
+          className="fixed inset-0 z-20 md:hidden bg-black/60 backdrop-blur-md flex items-center justify-center text-white text-sm animate-fade-in"
           onClick={toggleSidebar}
         >
           Tap anywhere to close the menu
@@ -90,7 +95,7 @@ const AppContent = () => {
         {authUser && <Navbar user={authUser} toggleSidebar={toggleSidebar} />}
 
         {/* Page Content */}
-        <div className="flex flex-col flex-1 overflow-y-auto bg-gray-100 p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           <Routes>
             <Route
               path="/"
@@ -145,10 +150,50 @@ const AppContent = () => {
               }
             />
             <Route
+              path="/subjects"
+              element={
+                <ProtectedRoute>
+                  <SubjectManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/user-management"
               element={
                 <ProtectedRoute>
                   <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leaves"
+              element={
+                <ProtectedRoute>
+                  <Leaves />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/timetable"
+              element={
+                <ProtectedRoute>
+                  <Timetable />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit-logs"
+              element={
+                <ProtectedRoute>
+                  <AuditLogs />
                 </ProtectedRoute>
               }
             />

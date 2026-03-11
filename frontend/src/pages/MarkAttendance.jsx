@@ -8,6 +8,8 @@ import BarChart from "../components/BarChart";
 const MarkAttendance = () => {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
   const [students, setStudents] = useState([]);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,28 @@ const MarkAttendance = () => {
 
     fetchClasses();
   }, []);
+
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      if (!selectedClass) {
+        setSubjects([]);
+        setSelectedSubject(null);
+        return;
+      }
+      try {
+        const res = await axiosInstance.get(`/subjects/class/${selectedClass}`);
+        setSubjects(res.data);
+        if (res.data.length > 0) {
+          setSelectedSubject(res.data[0]._id);
+        } else {
+          setSelectedSubject(null);
+        }
+      } catch (err) {
+        setError("Failed to load subjects.");
+      }
+    };
+    fetchSubjects();
+  }, [selectedClass]);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -89,6 +113,7 @@ const MarkAttendance = () => {
 
       await axiosInstance.post("/attendance/mark", {
         classId: selectedClass,
+        subjectId: selectedSubject || undefined,
         date,
         attendance: attendanceArray,
       });
@@ -99,7 +124,7 @@ const MarkAttendance = () => {
       // Update attendance summary, activities, and line chart data
       fetchAttendanceSummary();
       setActivities((prev) => [
-        { message: `Attendance marked for class ${selectedClass} on ${date}` },
+        { message: `Attendance marked for class ${selectedClass}${selectedSubject ? ` / subject ${selectedSubject}` : ''} on ${date}` },
         ...prev,
       ]);
     } catch (err) {
@@ -109,35 +134,54 @@ const MarkAttendance = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Mark Attendance</h2>
+    <div className="glass-card flex flex-col gap-6 max-w-4xl mx-auto w-full">
+      <h2 className="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">Mark Attendance</h2>
 
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-      {successMessage && <div className="text-green-500 mb-2">{successMessage}</div>}
+      {error && <div className="text-red-400 font-semibold mb-2">{error}</div>}
+      {successMessage && <div className="text-green-400 font-semibold mb-2">{successMessage}</div>}
 
-      <div className="mb-4">
-        <label className="block mb-1 font-semibold">Select Class:</label>
-        <select
-          value={selectedClass || ""}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          className="border p-2 rounded w-full"
-        >
-          {classes.map((cls) => (
-            <option key={cls._id} value={cls._id}>
-              {cls.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block mb-2 font-semibold text-neutral-300 tracking-wider text-sm uppercase">Select Class</label>
+          <select
+            value={selectedClass || ""}
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className="glass-input w-full"
+          >
+            {classes.map((cls) => (
+              <option key={cls._id} value={cls._id} className="text-black bg-white">
+                {cls.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 font-semibold">Select Date:</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
+        {subjects.length > 0 && (
+          <div>
+            <label className="block mb-2 font-semibold text-neutral-300 tracking-wider text-sm uppercase">Select Subject</label>
+            <select
+              value={selectedSubject || ""}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="glass-input w-full"
+            >
+              {subjects.map((subj) => (
+                <option key={subj._id} value={subj._id} className="text-black bg-white">
+                  {subj.name} {subj.teacherId ? `(${subj.teacherId.name})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label className="block mb-2 font-semibold text-neutral-300 tracking-wider text-sm uppercase">Select Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="glass-input w-full [&::-webkit-calendar-picker-indicator]:filter-invert"
+          />
+        </div>
       </div>
 
       {loading ? (

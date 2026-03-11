@@ -1,9 +1,22 @@
 import Class from '../models/ClassModel.js';
 import User from '../models/UserModel.js';
+import Subject from '../models/SubjectModel.js';
 
 export const getClasses = async (req, res) => {
   try {
-    const classes = await Class.find();
+    let classes = await Class.find();
+
+    if (req.user && req.user.role === 'teacher') {
+      const teacherId = req.user.id;
+      const subjects = await Subject.find({ teacherId });
+      const classIdsFromSubjects = subjects.map(sub => sub.classId.toString());
+
+      classes = classes.filter(cls =>
+        (cls.teacherId && cls.teacherId.toString() === teacherId) ||
+        classIdsFromSubjects.includes(cls._id.toString())
+      );
+    }
+
     res.json(classes);
   } catch (error) {
     console.error('Error fetching classes:', error);

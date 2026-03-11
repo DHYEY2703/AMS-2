@@ -1,13 +1,45 @@
 import Attendance from '../models/AttendanceModels.js';
+import User from '../models/UserModel.js';
+import { sendAttendanceEmail } from '../lib/mailService.js';
+import mongoose from 'mongoose';
+import AuditLog from '../models/AuditLogModel.js';
 
 export const markAttendance = async (req, res) => {
   try {
-    const { classId, date, attendance } = req.body;
+    const { classId, subjectId, date, attendance } = req.body;
 
-    // Find existing attendance document for class and date
-    let attendanceDoc = await Attendance.findOne({ classId, date });
+    // Find existing attendance document for class, subject, and date
+    const query = { classId, date };
+    if (subjectId) query.subjectId = subjectId;
+    let attendanceDoc = await Attendance.findOne(query);
 
     if (attendanceDoc) {
+      const auditLogsToInsert = [];
+
+      attendance.forEach((newRecord) => {
+        const oldRecord = attendanceDoc.records.find(
+          (r) => r.studentId.toString() === newRecord.studentId.toString()
+        );
+        const formattedNewStatus = newRecord.status.charAt(0).toUpperCase() + newRecord.status.slice(1).toLowerCase();
+
+        if (oldRecord && oldRecord.status !== formattedNewStatus) {
+          auditLogsToInsert.push({
+            action: "ATTENDANCE_CHANGED",
+            performedBy: req.user._id,
+            studentId: newRecord.studentId,
+            classId,
+            subjectId: subjectId || null,
+            date,
+            oldStatus: oldRecord.status,
+            newStatus: formattedNewStatus
+          });
+        }
+      });
+
+      if (auditLogsToInsert.length > 0) {
+        await AuditLog.insertMany(auditLogsToInsert);
+      }
+
       // Update records array
       attendanceDoc.records = attendance.map((record) => ({
         studentId: record.studentId,
@@ -15,17 +47,37 @@ export const markAttendance = async (req, res) => {
       }));
     } else {
       // Create new attendance document
-      attendanceDoc = new Attendance({
+      const newDocParams = {
         classId,
         date,
         records: attendance.map((record) => ({
           studentId: record.studentId,
           status: record.status.charAt(0).toUpperCase() + record.status.slice(1).toLowerCase(),
         })),
-      });
+      };
+      if (subjectId) newDocParams.subjectId = subjectId;
+      attendanceDoc = new Attendance(newDocParams);
     }
 
     await attendanceDoc.save();
+
+    // Check for absent students to send email
+    // This is optional and requires process.env.EMAIL_USER & process.env.EMAIL_PASS
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      attendance.forEach(async (record) => {
+        if (record.status.toLowerCase() === 'absent') {
+          try {
+            const student = await User.findById(record.studentId);
+            if (student && student.email) {
+              const subjectName = subjectId ? (await mongoose.model('Subject').findById(subjectId))?.name : "their class";
+              await sendAttendanceEmail(student.email, student.name, subjectName, date, "Absent");
+            }
+          } catch (err) {
+            console.error("Failed to process email for absentee", err);
+          }
+        }
+      });
+    }
 
     res.status(200).json({ message: 'Attendance marked successfully' });
   } catch (error) {
@@ -40,7 +92,9 @@ export const getAttendanceReport = async (req, res) => {
     console.log("Fetching attendance report for studentId:", studentId);
 
     // Find attendance documents where records.studentId matches studentId
-    const attendanceDocs = await Attendance.find({ "records.studentId": studentId }).populate('classId', 'name');
+    const attendanceDocs = await Attendance.find({ "records.studentId": studentId })
+      .populate('classId', 'name')
+      .populate('subjectId', 'name');
 
     // Extract attendance records for the student
     const studentAttendance = attendanceDocs.map((doc) => {
@@ -48,6 +102,7 @@ export const getAttendanceReport = async (req, res) => {
       return {
         classId: doc.classId,
         className: doc.classId.name,
+        subjectName: doc.subjectId ? doc.subjectId.name : null,
         date: doc.date,
         status: record ? record.status : "Absent",
       };

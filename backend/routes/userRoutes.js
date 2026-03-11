@@ -1,10 +1,10 @@
 import express from 'express';
 import protect from "../middleware/authMiddleware.js";
-import { getTeachers, getStudents, loginController, signupController, authCheck, getUsers } from "../controllers/userController.js";
+import { getTeachers, getStudents, loginController, signupController, authCheck, getUsers, updateProfile } from "../controllers/userController.js";
 
 const router = express.Router();
 // Signup
-router.post("/signup", signupController );
+router.post("/signup", signupController);
 
 // Login
 router.post("/login", loginController);
@@ -15,10 +15,13 @@ router.post("/logout", protect(), async (req, res) => {
 });
 
 // Auth check endpoint
-router.get("/auth/check", protect(),authCheck );
+router.get("/auth/check", protect(), authCheck);
+
+// Update profile
+router.put("/profile", protect(), updateProfile);
 
 // Get all users (Admin only)
-router.get("/", protect(["admin"]),getUsers);
+router.get("/", protect(["admin"]), getUsers);
 
 // Get all teachers
 router.get("/teachers", protect(), getTeachers);

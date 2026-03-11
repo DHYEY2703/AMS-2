@@ -107,67 +107,70 @@ const ClassManagement = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Class Management</h2>
+    <div className="glass-card flex flex-col gap-6 max-w-6xl mx-auto w-full">
+      <h2 className="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">Class Management</h2>
 
-      {error && <div className="text-red-600 mb-4">{error}</div>}
+      {error && <div className="text-red-400 font-semibold mb-2">{error}</div>}
 
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Add New Class</h3>
-        <input
-          type="text"
-          placeholder="Class Name"
-          value={newClassName}
-          onChange={(e) => setNewClassName(e.target.value)}
-          className="border p-2 mr-2"
-        />
-        <button
-          onClick={handleAddClass}
-          className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-        >
-          Add Class
-        </button>
+      <div className="mb-6 bg-white/5 border border-white/5 p-6 rounded-3xl backdrop-blur-md">
+        <h3 className="text-xl font-bold mb-4 tracking-wide text-white drop-shadow-md">Add New Class</h3>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <input
+            type="text"
+            placeholder="Class Name"
+            value={newClassName}
+            onChange={(e) => setNewClassName(e.target.value)}
+            className="glass-input flex-grow"
+          />
+          <button
+            onClick={handleAddClass}
+            className="glass-button whitespace-nowrap"
+          >
+            Add Class
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div>Loading classes...</div>
       ) : classes.length === 0 ? (
-        <div>No classes found.</div>
+        <div className="text-neutral-400 font-medium">No classes found.</div>
       ) : (
         <>
-          <table className="w-full border-collapse border border-gray-300">
+          <div className="overflow-x-auto rounded-3xl border border-white/10 shadow-[8px_8px_32px_rgba(0,0,0,0.5)]">
+            <table className="w-full text-left border-collapse backdrop-blur-xl bg-neutral-900/40">
             <thead>
-              <tr>
-                <th className="border border-gray-300 p-2">Name</th>
-                <th className="border border-gray-300 p-2">Teacher</th>
-                <th className="border border-gray-300 p-2">Actions</th>
+              <tr className="bg-neutral-800/60 uppercase text-xs tracking-widest text-neutral-400 border-b border-white/10">
+                <th className="p-4 font-bold">Name</th>
+                <th className="p-4 font-bold">Teacher</th>
+                <th className="p-4 font-bold">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {classes.map((cls) => (
-                <tr key={cls._id}>
-                  <td className="border border-gray-300 p-2">
+                <tr key={cls._id} className="transition-colors hover:bg-white-[0.02]">
+                  <td className="p-4 font-semibold text-neutral-200">
                     {editClassId === cls._id ? (
                       <input
                         type="text"
                         value={editClassName}
                         onChange={(e) => setEditClassName(e.target.value)}
-                        className="border p-1 w-full"
+                        className="glass-input w-full p-2 py-1"
                       />
                     ) : (
                       cls.name
                     )}
                   </td>
-                  <td className="border border-gray-300 p-2">
+                  <td className="p-4 text-neutral-400">
                     {editClassId === cls._id ? (
                       <select
                         value={editTeacherId}
                         onChange={(e) => setEditTeacherId(e.target.value)}
-                        className="border p-1 w-full"
+                        className="glass-input w-full p-2 py-1"
                       >
-                        <option value="">Select a teacher</option>
+                        <option value="" className="text-black bg-white">Select a teacher</option>
                         {teachers.map((teacher) => (
-                          <option key={teacher._id} value={teacher._id}>
+                          <option key={teacher._id} value={teacher._id} className="text-black bg-white">
                             {teacher.name}
                           </option>
                         ))}
@@ -181,18 +184,18 @@ const ClassManagement = () => {
 
                     )}
                   </td>
-                  <td className="border border-gray-300 p-2">
+                  <td className="p-4 flex gap-2">
                     {editClassId === cls._id ? (
                       <>
                         <button
                           onClick={handleUpdateClass}
-                          className="bg-green-500 text-white px-2 py-1 mr-2 rounded"
+                          className="glass-button text-xs py-1 px-3 bg-white/20 hover:bg-white text-white hover:text-black font-semibold shadow-none rounded-lg border border-white/20"
                         >
                           Save
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="bg-gray-500 text-white px-2 py-1 rounded"
+                          className="glass-button text-xs py-1 px-3 bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white font-semibold shadow-none rounded-lg border border-red-500/20"
                         >
                           Cancel
                         </button>
@@ -201,13 +204,13 @@ const ClassManagement = () => {
                       <>
                         <button
                           onClick={() => startEditClass(cls)}
-                          className="bg-yellow-500 text-white px-2 py-1 mr-2 rounded"
+                          className="glass-button text-xs py-1 px-3 bg-white/10 hover:bg-white text-white hover:text-black font-semibold shadow-none rounded-lg border border-white/10"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteClass(cls._id)}
-                          className="bg-red-500 text-white px-2 py-1 rounded"
+                          className="glass-button text-xs py-1 px-3 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white font-semibold shadow-none rounded-lg border border-red-500/10"
                         >
                           Delete
                         </button>
@@ -218,73 +221,76 @@ const ClassManagement = () => {
               ))}
             </tbody>
           </table>
+        </div>
           {showAssignTeacher && (
-            <div className="mt-6 p-4 border border-gray-300 rounded">
-              <h3 className="text-xl font-semibold mb-4">Assign Teacher to Class</h3>
+            <div className="mt-6 bg-white/5 border border-white/5 p-6 rounded-3xl backdrop-blur-md">
+              <h3 className="text-xl font-bold mb-4 tracking-wide text-white drop-shadow-md">Assign Teacher to Class</h3>
               <div className="mb-4">
-                <label className="block mb-1 font-medium">Select Class</label>
+                <label className="block mb-2 font-semibold text-neutral-300 tracking-wider text-sm uppercase">Select Class</label>
                 <select
                   value={assignClassId}
                   onChange={(e) => setAssignClassId(e.target.value)}
-                  className="border p-2 w-full"
+                  className="glass-input w-full"
                 >
-                  <option value="">Select a class</option>
+                  <option value="" className="text-black bg-white">Select a class</option>
                   {classes.map((cls) => (
-                    <option key={cls._id} value={cls._id}>
+                    <option key={cls._id} value={cls._id} className="text-black bg-white">
                       {cls.name}
                     </option>
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
-                <label className="block mb-1 font-medium">Select Teacher</label>
+              <div className="mb-6">
+                <label className="block mb-2 font-semibold text-neutral-300 tracking-wider text-sm uppercase">Select Teacher</label>
                 <select
                   value={assignTeacherId}
                   onChange={(e) => setAssignTeacherId(e.target.value)}
-                  className="border p-2 w-full"
+                  className="glass-input w-full"
                 >
-                  <option value="">Select a teacher</option>
+                  <option value="" className="text-black bg-white">Select a teacher</option>
                   {teachers.map((teacher) => (
-                    <option key={teacher._id} value={teacher._id}>
+                    <option key={teacher._id} value={teacher._id} className="text-black bg-white">
                       {teacher.name}
                     </option>
                   ))}
                 </select>
               </div>
-              <button
-                onClick={async () => {
-                  if (!assignClassId || !assignTeacherId) {
-                    setError("Please select both class and teacher.");
-                    return;
-                  }
-                  try {
-                    await axiosInstance.put(`/classes/${assignClassId}`, {
-                      teacherId: assignTeacherId,
-                    });
+              <div className="flex gap-4">
+                <button
+                  onClick={async () => {
+                    if (!assignClassId || !assignTeacherId) {
+                      setError("Please select both class and teacher.");
+                      return;
+                    }
+                    try {
+                      await axiosInstance.put(`/classes/${assignClassId}`, {
+                        teacherId: assignTeacherId,
+                      });
+                      setShowAssignTeacher(false);
+                      setAssignClassId("");
+                      setAssignTeacherId("");
+                      fetchClasses();
+                      setError(null);
+                    } catch  {
+                      setError("Failed to assign teacher.");
+                    }
+                  }}
+                  className="glass-button"
+                >
+                  Assign
+                </button>
+                <button
+                  onClick={() => {
                     setShowAssignTeacher(false);
                     setAssignClassId("");
                     setAssignTeacherId("");
-                    fetchClasses();
                     setError(null);
-                  } catch  {
-                    setError("Failed to assign teacher.");
-                  }
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded"
-              >
-                Assign
-              </button>
-              <button
-                onClick={() => {
-                  setShowAssignTeacher(false);
-                  setAssignClassId("");
-                  setAssignTeacherId("");
-                  setError(null);
-                }}
-                className="ml-4 bg-gray-500 text-white px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
+                  }}
+                  className="glass-button bg-red-500/20 text-red-300 border border-red-500/20 hover:bg-red-500 hover:text-white shadow-none"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </>

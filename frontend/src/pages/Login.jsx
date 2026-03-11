@@ -40,47 +40,47 @@ const Login = () => {
   }, [authUser, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 space-y-6">
-        <h2 className="text-3xl font-bold text-center text-blue-700">Login to Your Account</h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="min-h-screen flex items-center justify-center bg-transparent">
+      <div className="w-full max-w-md glass-card p-10 space-y-8">
+        <h2 className="text-3xl font-bold text-center text-white tracking-widest drop-shadow-md uppercase">Login to Your Account</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
+            <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="glass-input w-full"
             />
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Password</label>
+            <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Password</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="glass-input w-full"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center gap-2 glass-button mt-4 disabled:opacity-50"
           >
             {loading && <Loader2 className="animate-spin h-5 w-5" />}
             {loading ? "Logging In..." : "Login"}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-neutral-400 font-medium">
           Don&apos;t have an account?{" "}
-          <Link to="/signup" className="text-blue-600 font-medium hover:underline">
+          <Link to="/signup" className="text-white font-bold hover:underline tracking-wide">
             Sign Up
           </Link>
         </p>

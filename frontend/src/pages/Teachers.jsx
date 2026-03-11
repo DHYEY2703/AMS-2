@@ -30,38 +30,42 @@ const Teachers = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">User and Class Management</h2>
+    <div className="glass-card flex flex-col gap-6 max-w-6xl mx-auto w-full">
+      <h2 className="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">User and Class Management</h2>
 
-      <section className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Teachers</h3>
-        {teachers.length === 0 ? (
-          <p>No teachers found.</p>
-        ) : (
-          <ul className="list-disc list-inside">
-            {teachers.map((teacher) => (
-              <li key={teacher.id}>
-                {teacher.name} ({teacher.email})
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section className="bg-white/5 border border-white/5 p-6 rounded-3xl backdrop-blur-md">
+          <h3 className="text-xl font-bold mb-4 tracking-wide text-white drop-shadow-md">Teachers</h3>
+          {teachers.length === 0 ? (
+            <p className="text-neutral-400 font-medium">No teachers found.</p>
+          ) : (
+            <ul className="space-y-3">
+              {teachers.map((teacher) => (
+                <li key={teacher.id} className="flex flex-col p-3 rounded-xl bg-black/20 border border-white/5">
+                  <span className="font-semibold text-neutral-200">{teacher.name}</span>
+                  <span className="text-sm text-neutral-500">{teacher.email}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-      <section>
-        <h3 className="text-xl font-semibold mb-2">Classes</h3>
-        {classes.length === 0 ? (
-          <p>No classes found.</p>
-        ) : (
-          <ul className="list-disc list-inside">
-            {classes.map((cls) => (
-              <li key={cls.id}>
-                {cls.name} - {cls.description || "No description"}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <section className="bg-white/5 border border-white/5 p-6 rounded-3xl backdrop-blur-md">
+          <h3 className="text-xl font-bold mb-4 tracking-wide text-white drop-shadow-md">Classes</h3>
+          {classes.length === 0 ? (
+            <p className="text-neutral-400 font-medium">No classes found.</p>
+          ) : (
+            <ul className="space-y-3">
+              {classes.map((cls) => (
+                <li key={cls.id} className="flex flex-col p-3 rounded-xl bg-black/20 border border-white/5">
+                  <span className="font-semibold text-neutral-200">{cls.name}</span>
+                  <span className="text-sm text-neutral-500">{cls.description || "No description"}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

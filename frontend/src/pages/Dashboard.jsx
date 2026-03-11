@@ -25,20 +25,22 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
       {/* Left Column */}
-      <div>
+      <div className="glass-card flex flex-col gap-6">
         <ProgressBars classes={classes} />
       </div>
 
       {/* Right Column */}
-      <div>
+      <div className="flex flex-col gap-6">
         {chartData && (
-          <div style={{ height: '400px', width: '100%' }}>
+          <div className="glass-card" style={{ height: '400px', width: '100%' }}>
             <BarChart data={chartData} />
           </div>
         )}
-        <ActivityFeed activities={activities} />
+        <div className="glass-card">
+          <ActivityFeed activities={activities} />
+        </div>
       </div>
     </div>
   );

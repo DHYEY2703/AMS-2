@@ -50,73 +50,73 @@ const Signup = () => {
   }, [authUser, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 space-y-6">
-        <h2 className="text-3xl font-bold text-center text-blue-700">Create an Account</h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="min-h-screen flex items-center justify-center bg-transparent py-10">
+      <div className="w-full max-w-md glass-card p-10 space-y-8">
+        <h2 className="text-3xl font-bold text-center text-white tracking-widest drop-shadow-md uppercase">Create an Account</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Name</label>
+            <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Name</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="glass-input w-full"
             />
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
+            <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="glass-input w-full"
             />
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Password</label>
+            <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Password</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="glass-input w-full"
             />
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Role</label>
+            <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Role</label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="glass-input w-full"
             >
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-              <option value="admin">Admin</option>
+              <option value="student" className="text-black bg-white">Student</option>
+              <option value="teacher" className="text-black bg-white">Teacher</option>
+              <option value="admin" className="text-black bg-white">Admin</option>
             </select>
           </div>
 
           {formData.role != "admin" && (
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">Select Class</label>
+              <label className="block mb-2 text-xs font-bold text-neutral-400 uppercase tracking-wider">Select Class</label>
               <select
                 name="classId"
                 value={formData.classId}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="glass-input w-full"
               >
-                <option value="">Select a class</option>
+                <option value="" className="text-black bg-white">Select a class</option>
                 {classes.map((cls) => (
-                  <option key={cls._id} value={cls._id}>
+                  <option key={cls._id} value={cls._id} className="text-black bg-white">
                     {cls.name}
                   </option>
                 ))}
@@ -127,15 +127,15 @@ const Signup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center gap-2 glass-button mt-4 disabled:opacity-50"
           >
             {loading && <Loader2 className="animate-spin h-5 w-5" />}
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-neutral-400 font-medium">
          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 font-medium hover:underline">
+          <Link to="/login" className="text-white font-bold hover:underline tracking-wide">
            Login
           </Link>
         </p>

@@ -10,7 +10,8 @@ const UserSchema = new mongoose.Schema({
     default: "student",
   },
   classId: { type: mongoose.Schema.Types.ObjectId, ref: "Class" },
+  profilePic: { type: String, default: "" },
 });
 
-const UserModel= mongoose.model("User", UserSchema);
+const UserModel = mongoose.model("User", UserSchema);
 export default UserModel;

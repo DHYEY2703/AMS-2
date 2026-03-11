@@ -4,7 +4,7 @@ import protect from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', getClasses);
+router.get('/', protect(), getClasses);
 router.get('/:classId/students', getStudentsByClass);
 router.post('/', protect(), addClass);
 router.put('/:classId', protect(), updateClass);
