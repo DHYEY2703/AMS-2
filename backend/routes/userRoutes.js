@@ -1,6 +1,6 @@
 import express from 'express';
 import protect from "../middleware/authMiddleware.js";
-import { getTeachers, getStudents, loginController, authCheck, getUsers, updateProfile, createUser } from "../controllers/userController.js";
+import { getTeachers, getStudents, getParents, loginController, authCheck, getUsers, updateProfile, createUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -29,5 +29,8 @@ router.get("/teachers", protect(), getTeachers);
 
 // Get all students
 router.get("/students", protect(), getStudents);
+
+// Get all parents
+router.get("/parents", protect(["admin", "teacher"]), getParents);
 
 export default router;

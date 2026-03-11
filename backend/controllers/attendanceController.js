@@ -1,6 +1,7 @@
 import Attendance from '../models/AttendanceModels.js';
 import User from '../models/UserModel.js';
 import { sendAttendanceEmail } from '../lib/mailService.js';
+import { sendAbsentSms } from '../lib/smsService.js';
 import mongoose from 'mongoose';
 import AuditLog from '../models/AuditLogModel.js';
 
@@ -61,19 +62,33 @@ export const markAttendance = async (req, res) => {
 
     await attendanceDoc.save();
 
-    // Check for absent students to send email
-    // This is optional and requires process.env.EMAIL_USER & process.env.EMAIL_PASS
+    // Check for absent students to send email & SMS
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       attendance.forEach(async (record) => {
         if (record.status.toLowerCase() === 'absent') {
           try {
             const student = await User.findById(record.studentId);
-            if (student && student.email) {
+            if (student) {
               const subjectName = subjectId ? (await mongoose.model('Subject').findById(subjectId))?.name : "their class";
-              await sendAttendanceEmail(student.email, student.name, subjectName, date, "Absent");
+
+              // Send Email to Student
+              if (student.email) {
+                await sendAttendanceEmail(student.email, student.name, subjectName, date, "Absent");
+              }
+
+              // Find Parent and send SMS and Email
+              const parents = await User.find({ role: "parent", children: student._id });
+              parents.forEach(async (parent) => {
+                if (parent.phoneNumber) {
+                  await sendAbsentSms(parent.phoneNumber, student.name, subjectName, date);
+                }
+                if (parent.email) {
+                  await sendAttendanceEmail(parent.email, parent.name + " (" + student.name + "'s Parent)", subjectName, date, "Absent");
+                }
+              });
             }
           } catch (err) {
-            console.error("Failed to process email for absentee", err);
+            console.error("Failed to process notifications for absentee", err);
           }
         }
       });

@@ -6,11 +6,13 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: {
     type: String,
-    enum: ["admin", "teacher", "student"],
+    enum: ["admin", "teacher", "student", "parent"],
     default: "student",
   },
   classId: { type: mongoose.Schema.Types.ObjectId, ref: "Class" },
   profilePic: { type: String, default: "" },
+  phoneNumber: { type: String }, // For SMS alerts
+  children: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] // Array of student IDs for parents
 });
 
 const UserModel = mongoose.model("User", UserSchema);

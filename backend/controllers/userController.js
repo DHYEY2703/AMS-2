@@ -54,6 +54,17 @@ export const getStudents = async (req, res) => {
   }
 };
 
+// Controller to get users with role "parent"
+export const getParents = async (req, res) => {
+  try {
+    const parents = await User.find({ role: "parent" }).select("-password").populate("children", "name email");
+    res.json(parents);
+  } catch (error) {
+    console.error("Error in getParents:", error);
+    res.status(500).json({ message: "Server error fetching parents" });
+  }
+};
+
 //Login controller 
 export const loginController = async (req, res) => {
   const { email, password } = req.body;
@@ -72,7 +83,7 @@ export const loginController = async (req, res) => {
 // Create User Controller (Admin Only)
 export const createUser = async (req, res) => {
   try {
-    const { name, email, password, role, classId } = req.body;
+    const { name, email, password, role, classId, phoneNumber, children } = req.body;
     if (!name || !email || !password || !role) {
       return res.status(400).json({ msg: "Please provide all required fields" });
     }
@@ -93,10 +104,12 @@ export const createUser = async (req, res) => {
       password: hashedPassword,
       role,
       classId: role === "student" || role === "teacher" ? classId : undefined,
+      phoneNumber: role === "parent" ? phoneNumber : undefined,
+      children: role === "parent" ? children : undefined,
     });
 
     await newUser.save();
-    const populatedUser = await User.findById(newUser._id).populate('classId');
+    const populatedUser = await User.findById(newUser._id).populate('classId').populate('children', 'name email');
 
     res.status(201).json(populatedUser);
   } catch (error) {

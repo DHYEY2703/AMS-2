@@ -26,7 +26,7 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
 
       <h3 className="text-xs font-bold text-neutral-400 mb-3 tracking-wider uppercase">Main</h3>
       <ul className="space-y-2">
-        {user?.role !== "student" && (
+        {user?.role !== "student" && user?.role !== "parent" && (
           <li>
             <NavLink to="/" end className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
               <Home className="mr-2 w-4 h-4" />
@@ -82,6 +82,17 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
               <NavLink to="/leaves" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ClipboardList className="mr-2 w-4 h-4" />
                 My Leaves
+              </NavLink>
+            </li>
+          </>
+        )}
+
+        {user?.role === "parent" && (
+          <>
+            <li>
+              <NavLink to="/parent-dashboard" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
+                <Home className="mr-2 w-4 h-4" />
+                Parent Portal
               </NavLink>
             </li>
           </>

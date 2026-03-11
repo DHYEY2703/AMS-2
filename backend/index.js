@@ -13,6 +13,7 @@ import subjectRoutes from './routes/subjectRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
 import timetableRoutes from './routes/timetableRoutes.js';
 import auditLogRoutes from './routes/auditLogRoutes.js';
+import parentRoutes from './routes/parentRoutes.js';
 import { connectDB } from "./lib/db.js";
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/leaves", leaveRoutes);
 app.use("/api/timetable", timetableRoutes);
 app.use("/api/audit-logs", auditLogRoutes);
+app.use("/api/parent", parentRoutes);
 
 // Serve frontend static files in production
 if (process.env.NODE_ENV === 'production') {

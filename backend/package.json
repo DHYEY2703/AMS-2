@@ -23,6 +23,7 @@
     "mongoose": "^8.15.1",
     "nodemailer": "^8.0.2",
     "nodemon": "^3.1.10",
-    "student-attendance-system": "file:.."
+    "student-attendance-system": "file:..",
+    "twilio": "^5.12.2"
   }
 }

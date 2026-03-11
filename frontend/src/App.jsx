@@ -23,6 +23,7 @@ import Profile from "./pages/Profile";
 import Leaves from "./pages/Leaves";
 import Timetable from "./pages/Timetable";
 import AuditLogs from "./pages/AuditLogs";
+import ParentDashboard from "./pages/ParentDashboard";
 
 const ProtectedRoute = ({ children }) => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -102,6 +103,8 @@ const AppContent = () => {
                 <ProtectedRoute>
                   {authUser?.role === "student" ? (
                     <StudentDashboard />
+                  ) : authUser?.role === "parent" ? (
+                    <ParentDashboard />
                   ) : (
                     <Dashboard />
                   )}
@@ -193,6 +196,14 @@ const AppContent = () => {
               element={
                 <ProtectedRoute>
                   <AuditLogs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/parent-dashboard"
+              element={
+                <ProtectedRoute>
+                  <ParentDashboard />
                 </ProtectedRoute>
               }
             />
