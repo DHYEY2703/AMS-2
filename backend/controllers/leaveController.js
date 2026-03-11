@@ -1,25 +1,31 @@
 import Leave from "../models/LeaveModel.js";
 
-// Apply for leave (Student only)
+// Apply for leave
 export const applyLeave = async (req, res) => {
     try {
         const { startDate, endDate, reason } = req.body;
-        const studentId = req.user.id;
-        const classId = req.user.classId;
+        const userId = req.user.id || req.user._id;
+        const role = req.user.role;
+        const classId = req.user.classId || null;
 
         if (!startDate || !endDate || !reason) {
             return res.status(400).json({ message: "Please provide all required fields." });
         }
 
-        const leave = new Leave({
-            studentId,
-            classId,
+        const leaveParams = {
+            userId,
+            role,
             startDate,
             endDate,
             reason,
             status: "Pending"
-        });
+        };
 
+        if (role === "student" && classId) {
+            leaveParams.classId = classId;
+        }
+
+        const leave = new Leave(leaveParams);
         await leave.save();
         res.status(201).json(leave);
     } catch (error) {
@@ -31,24 +37,25 @@ export const applyLeave = async (req, res) => {
 // Get leaves based on role
 export const getLeaves = async (req, res) => {
     try {
-        const { role, id, classId } = req.user;
+        const role = req.user.role;
+        const userId = req.user.id || req.user._id;
+        const classId = req.user.classId;
+
         let leaves = [];
 
         if (role === "student") {
             // Student sees only their own leaves
-            leaves = await Leave.find({ studentId: id }).populate("studentId", "name email").sort({ createdAt: -1 });
+            leaves = await Leave.find({ userId }).populate("userId", "name email").sort({ createdAt: -1 });
         } else if (role === "teacher") {
-            // Teacher sees leaves for their classes (Wait, user.classId might not be enough if a teacher has multiple classes, but going by existing logic, teacher logs in and has access to their class/subjects. Let's just fetch all leaves for the teacher's classId if provided, or return all if we iterate).
-            // If we just want all leaves for now or filter by class:
+            // Teacher sees their own leaves AND leaves of their class
             if (classId) {
-                leaves = await Leave.find({ classId }).populate("studentId", "name email").populate("classId", "name").sort({ createdAt: -1 });
+                leaves = await Leave.find({ $or: [{ userId }, { classId }] }).populate("userId", "name email").populate("classId", "name").sort({ createdAt: -1 });
             } else {
-                // Generic access
-                leaves = await Leave.find().populate("studentId", "name email").populate("classId", "name").sort({ createdAt: -1 });
+                leaves = await Leave.find({ userId }).populate("userId", "name email").sort({ createdAt: -1 });
             }
         } else if (role === "admin") {
             // Admin sees all leaves
-            leaves = await Leave.find().populate("studentId", "name email").populate("classId", "name").sort({ createdAt: -1 });
+            leaves = await Leave.find().populate("userId", "name email").populate("classId", "name").sort({ createdAt: -1 });
         }
 
         res.json(leaves);

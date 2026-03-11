@@ -69,7 +69,7 @@ const Leaves = () => {
     <div className="glass-card flex flex-col gap-6 max-w-6xl mx-auto w-full p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <h2 className="text-3xl font-bold tracking-wide text-white drop-shadow-md">Leave Management</h2>
-        {authUser?.role === "student" && (
+        {(authUser?.role === "student" || authUser?.role === "teacher") && (
           <button 
             onClick={() => setShowForm(!showForm)}
             className="glass-button"
@@ -79,7 +79,7 @@ const Leaves = () => {
         )}
       </div>
 
-      {showForm && authUser?.role === "student" && (
+      {showForm && (authUser?.role === "student" || authUser?.role === "teacher") && (
         <form onSubmit={handleApplyLeave} className="glass-card bg-white/5 p-6 rounded-3xl mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -114,7 +114,7 @@ const Leaves = () => {
           <table className="w-full text-left border-collapse backdrop-blur-xl bg-neutral-900/40">
             <thead>
               <tr className="bg-neutral-800/60 uppercase text-xs tracking-widest text-neutral-400 border-b border-white/10">
-                {authUser?.role !== "student" && <th className="p-4 font-bold">Student</th>}
+                {authUser?.role !== "student" && <th className="p-4 font-bold">User (Role)</th>}
                 <th className="p-4 font-bold">Dates</th>
                 <th className="p-4 font-bold">Reason</th>
                 <th className="p-4 font-bold">Status</th>
@@ -125,7 +125,9 @@ const Leaves = () => {
               {leaves.map((leave) => (
                 <tr key={leave._id} className="transition-colors hover:bg-white-[0.02]">
                   {authUser?.role !== "student" && (
-                    <td className="p-4 font-semibold text-neutral-200">{leave.studentId?.name || "Unknown"}</td>
+                    <td className="p-4 font-semibold text-neutral-200">
+                      {leave.userId?.name || "Unknown"} <span className="text-neutral-500 text-xs font-normal uppercase">({leave.role})</span>
+                    </td>
                   )}
                   <td className="p-4 text-neutral-300">
                     <span className="block">{new Date(leave.startDate).toLocaleDateString()}</span>
@@ -144,10 +146,14 @@ const Leaves = () => {
                   {authUser?.role !== "student" && (
                     <td className="p-4 flex gap-2 justify-end">
                       {leave.status === "Pending" ? (
-                        <>
-                          <button onClick={() => handleUpdateStatus(leave._id, "Approved")} className="glass-button text-xs py-1 px-3 bg-emerald-500/20 text-emerald-200">Approve</button>
-                          <button onClick={() => handleUpdateStatus(leave._id, "Rejected")} className="glass-button text-xs py-1 px-3 bg-red-500/20 text-red-200">Reject</button>
-                        </>
+                         (authUser?.role === "admin" || (authUser?.role === "teacher" && leave.role === "student")) ? (
+                            <>
+                              <button onClick={() => handleUpdateStatus(leave._id, "Approved")} className="glass-button text-xs py-1 px-3 bg-emerald-500/20 text-emerald-200">Approve</button>
+                              <button onClick={() => handleUpdateStatus(leave._id, "Rejected")} className="glass-button text-xs py-1 px-3 bg-red-500/20 text-red-200">Reject</button>
+                            </>
+                         ) : (
+                            <span className="text-neutral-500 text-sm italic">Waiting Admin</span>
+                         )
                       ) : (
                         <span className="text-neutral-500 text-sm italic">Resolved</span>
                       )}

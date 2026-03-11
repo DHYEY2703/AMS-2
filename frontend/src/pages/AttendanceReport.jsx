@@ -40,11 +40,13 @@ const AttendanceReport = () => {
     const doc = new jsPDF();
     doc.text("Attendance Report", 14, 15);
     
-    const tableColumn = ["Class", "Subject", "Date", "Status"];
+    const hasStudentName = attendanceData.length > 0 && attendanceData[0].studentName;
+    const tableColumn = hasStudentName ? ["Student", "Class", "Subject", "Date", "Status"] : ["Class", "Subject", "Date", "Status"];
     const tableRows = [];
 
     attendanceData.forEach(record => {
       const rowData = [
+        ...(hasStudentName ? [record.studentName] : []),
         record.className || "N/A",
         record.subjectName || "N/A",
         new Date(record.date).toLocaleDateString(),
@@ -64,12 +66,16 @@ const AttendanceReport = () => {
   };
 
   const exportToExcel = () => {
-    const tableData = attendanceData.map(record => ({
-      Class: record.className || "N/A",
-      Subject: record.subjectName || "N/A",
-      Date: new Date(record.date).toLocaleDateString(),
-      Status: record.status
-    }));
+    const hasStudentName = attendanceData.length > 0 && attendanceData[0].studentName;
+    const tableData = attendanceData.map(record => {
+      const row = {};
+      if (hasStudentName) row["Student Name"] = record.studentName;
+      row["Class"] = record.className || "N/A";
+      row["Subject"] = record.subjectName || "N/A";
+      row["Date"] = new Date(record.date).toLocaleDateString();
+      row["Status"] = record.status;
+      return row;
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(tableData);
     const workbook = XLSX.utils.book_new();

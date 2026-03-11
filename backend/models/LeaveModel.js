@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 
 const leaveSchema = new mongoose.Schema({
-    studentId: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        required: true,
+    },
+    role: {
+        type: String,
         required: true,
     },
     classId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Class",
-        required: true,
     },
     startDate: {
         type: Date,

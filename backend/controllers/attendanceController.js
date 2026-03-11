@@ -76,6 +76,15 @@ export const markAttendance = async (req, res) => {
                 await sendAttendanceEmail(student.email, student.name, subjectName, date, "Absent");
               }
 
+              // Formal Warning Logic: Missed 3 days in a row?
+              const consecutiveAbsences = await Attendance.find({
+                classId,
+                date: { $lt: date },
+                "records": { $elemMatch: { studentId: student._id, status: { $regex: /^absent$/i } } }
+              }).sort({ date: -1 }).limit(2);
+
+              const isConsecutiveWarning = consecutiveAbsences.length === 2;
+
               // Find Parent and send SMS and Email
               const parents = await User.find({ role: "parent", children: student._id });
               parents.forEach(async (parent) => {
@@ -83,7 +92,12 @@ export const markAttendance = async (req, res) => {
                   await sendAbsentSms(parent.phoneNumber, student.name, subjectName, date);
                 }
                 if (parent.email) {
-                  await sendAttendanceEmail(parent.email, parent.name + " (" + student.name + "'s Parent)", subjectName, date, "Absent");
+                  if (isConsecutiveWarning) {
+                    // Automated Warning simulation
+                    await sendAttendanceEmail(parent.email, parent.name + " (Formal Warning PDF attached for " + student.name + ")", subjectName, date, "3 CONSECUTIVE ABSENCES WARNING");
+                  } else {
+                    await sendAttendanceEmail(parent.email, parent.name + " (" + student.name + "'s Parent)", subjectName, date, "Absent");
+                  }
                 }
               });
             }
@@ -103,24 +117,38 @@ export const markAttendance = async (req, res) => {
 
 export const getAttendanceReport = async (req, res) => {
   try {
-    const studentId = req.user._id;
-    console.log("Fetching attendance report for studentId:", studentId);
+    const userId = req.user._id;
+    const role = req.user.role;
+    console.log(`Fetching attendance report for ${role}:`, userId);
 
-    // Find attendance documents where records.studentId matches studentId
-    const attendanceDocs = await Attendance.find({ "records.studentId": studentId })
+    let query = {};
+    if (role === "student") {
+      query = { "records.studentId": userId };
+    }
+
+    const attendanceDocs = await Attendance.find(query)
       .populate('classId', 'name')
-      .populate('subjectId', 'name');
+      .populate('subjectId', 'name')
+      .populate('records.studentId', 'name email');
 
-    // Extract attendance records for the student
-    const studentAttendance = attendanceDocs.map((doc) => {
-      const record = doc.records.find((r) => r.studentId.toString() === studentId.toString());
-      return {
-        classId: doc.classId,
-        className: doc.classId.name,
-        subjectName: doc.subjectId ? doc.subjectId.name : null,
-        date: doc.date,
-        status: record ? record.status : "Absent",
-      };
+    // Extract attendance records
+    const studentAttendance = [];
+    attendanceDocs.forEach((doc) => {
+      doc.records.forEach((record) => {
+        if (role === "admin" || (role === "student" && record.studentId && record.studentId._id.toString() === userId.toString())) {
+          if (record.studentId) {
+            studentAttendance.push({
+              studentName: record.studentId.name,
+              studentEmail: record.studentId.email,
+              classId: doc.classId?._id,
+              className: doc.classId?.name,
+              subjectName: doc.subjectId ? doc.subjectId.name : null,
+              date: doc.date,
+              status: record.status || "Absent",
+            });
+          }
+        }
+      });
     });
 
     console.log("Attendance records found:", studentAttendance.length);
