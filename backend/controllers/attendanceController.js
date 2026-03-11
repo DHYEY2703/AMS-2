@@ -118,7 +118,7 @@ export const getAttendanceReport = async (req, res) => {
 
 export const getAttendanceSummary = async (req, res) => {
   try {
-    // Aggregate attendance data grouped by classId
+    // ... logic remains unchanged for getAttendanceSummary ...
     const summary = await Attendance.aggregate([
       {
         $unwind: "$records"
@@ -164,5 +164,29 @@ export const getAttendanceSummary = async (req, res) => {
   } catch (error) {
     console.error('Error fetching attendance summary:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getAttendanceRecord = async (req, res) => {
+  try {
+    const { classId, subjectId, date } = req.query;
+
+    // Build query to find the specific record
+    const query = { classId, date };
+    if (subjectId) {
+      query.subjectId = subjectId;
+    }
+
+    const attendanceDoc = await Attendance.findOne(query);
+
+    if (attendanceDoc) {
+      return res.json(attendanceDoc);
+    } else {
+      // Return empty 200 indicating no record exists yet
+      return res.status(200).json(null);
+    }
+  } catch (err) {
+    console.error("Error fetching existing record:", err);
+    res.status(500).json({ message: "Server error checking existing records" });
   }
 };

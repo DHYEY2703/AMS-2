@@ -18,6 +18,8 @@ const MarkAttendance = () => {
   const [attendanceSummary, setAttendanceSummary] = useState([]);
   const [activities, setActivities] = useState([]);
   const [lineChartData, setLineChartData] = useState(null);
+  const [existingRecord, setExistingRecord] = useState(null);
+  const [fetchingRecord, setFetchingRecord] = useState(false);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -73,6 +75,26 @@ const MarkAttendance = () => {
 
     fetchStudents();
   }, [selectedClass]);
+
+  // Fetch Existing Record to pre-fill table if updating past date
+  useEffect(() => {
+     const checkExistingRecord = async () => {
+        if (!selectedClass || !date) return;
+        setFetchingRecord(true);
+        try {
+           let queryUrl = `/attendance/record?classId=${selectedClass}&date=${date}`;
+           if (selectedSubject) queryUrl += `&subjectId=${selectedSubject}`;
+           const res = await axiosInstance.get(queryUrl);
+           setExistingRecord(res.data ? res.data.records : null);
+        } catch (err) {
+           console.error("Failed to fetch existing record");
+           setExistingRecord(null);
+        } finally {
+           setFetchingRecord(false);
+        }
+     };
+     checkExistingRecord();
+  }, [selectedClass, selectedSubject, date]);
 
   const fetchAttendanceSummary = async () => {
     try {
@@ -184,12 +206,13 @@ const MarkAttendance = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div>Loading students...</div>
+      {loading || fetchingRecord ? (
+        <div className="text-neutral-400 font-medium">Loading {fetchingRecord ? 'existing records' : 'students'}...</div>
       ) : (
         <AttendanceTable
           students={students}
           onSubmit={handleSubmit}
+          existingRecord={existingRecord}
         />
       )}
 

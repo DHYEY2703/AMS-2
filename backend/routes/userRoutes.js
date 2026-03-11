@@ -1,10 +1,11 @@
 import express from 'express';
 import protect from "../middleware/authMiddleware.js";
-import { getTeachers, getStudents, loginController, signupController, authCheck, getUsers, updateProfile } from "../controllers/userController.js";
+import { getTeachers, getStudents, loginController, authCheck, getUsers, updateProfile, createUser } from "../controllers/userController.js";
 
 const router = express.Router();
-// Signup
-router.post("/signup", signupController);
+
+// Admin creates user
+router.post("/create", protect(["admin"]), createUser);
 
 // Login
 router.post("/login", loginController);

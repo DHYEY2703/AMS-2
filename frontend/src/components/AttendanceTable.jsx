@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const AttendanceTable = ({ students, onSubmit }) => {
+const AttendanceTable = ({ students, onSubmit, existingRecord }) => {
   const [attendanceStatus, setAttendanceStatus] = useState({});
+
+  useEffect(() => {
+    // If existingRecord is provided, prepopulate the status (update scenario), else default to empty
+    const initialStatus = {};
+    if (existingRecord) {
+       existingRecord.forEach(rec => {
+          initialStatus[rec.studentId] = rec.status.toLowerCase();
+       });
+    }
+    setAttendanceStatus(initialStatus);
+  }, [students, existingRecord]);
 
   const handleStatusChange = (studentId, status) => {
     setAttendanceStatus((prev) => ({
@@ -75,12 +86,21 @@ const AttendanceTable = ({ students, onSubmit }) => {
           </tbody>
         </table>
       </div>
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-between items-center">
+        {existingRecord ? (
+          <span className="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-4 py-2 rounded-full border border-amber-500/20">
+             Editing Existing Record
+          </span>
+        ) : (
+          <span className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+             New Record
+          </span>
+        )}
         <button
           type="submit"
           className="glass-button"
         >
-          Submit Attendance
+          {existingRecord ? "Update Attendance" : "Submit Attendance"}
         </button>
       </div>
     </form>

@@ -19,7 +19,6 @@ import ClassManagement from "./pages/ClassManagement";
 import SubjectManagement from "./pages/SubjectManagement";
 import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import Leaves from "./pages/Leaves";
 import Timetable from "./pages/Timetable";
@@ -198,7 +197,6 @@ const AppContent = () => {
               }
             />
             <Route path="/login" element={authUser ? <Navigate to="/" /> : <Login />} />
-            <Route path="/signup" element={authUser ? <Navigate to="/" /> : <Signup />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

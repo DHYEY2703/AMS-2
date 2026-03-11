@@ -1,6 +1,7 @@
 import User from "../models/UserModel.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import AuditLog from "../models/AuditLogModel.js";
 
 // Controller to update a user's profile
 export const updateProfile = async (req, res) => {
@@ -68,7 +69,43 @@ export const loginController = async (req, res) => {
   res.json({ token, user });
 };
 
-//Singup Controller
+// Create User Controller (Admin Only)
+export const createUser = async (req, res) => {
+  try {
+    const { name, email, password, role, classId } = req.body;
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ msg: "Please provide all required fields" });
+    }
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ msg: "User already exists" });
+    }
+
+    // Only Admin can access this via route protection, but let's be sure
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ msg: "Not authorized to create users" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      classId: role === "student" || role === "teacher" ? classId : undefined,
+    });
+
+    await newUser.save();
+    const populatedUser = await User.findById(newUser._id).populate('classId');
+
+    res.status(201).json(populatedUser);
+  } catch (error) {
+    console.error("Create user error:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// Signup Controller (Obsolete / Redirected for Public Use)
 export const signupController = async (req, res) => {
   const { name, email, password, role, classId } = req.body;
   if (!name || !email || !password || !role) {

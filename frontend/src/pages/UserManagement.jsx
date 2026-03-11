@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
 
 const UserManagement = () => {
   const [activeTab, setActiveTab] = useState("teachers");
@@ -7,6 +8,17 @@ const UserManagement = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "student",
+    classId: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch teachers or students
   const fetchUsers = async (role) => {
@@ -44,22 +56,33 @@ const UserManagement = () => {
   return (
     <div className="glass-card flex flex-col gap-6 max-w-6xl mx-auto w-full">
       <h2 className="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">User Management</h2>
-      <div className="flex gap-4 border-b border-white/10 pb-4">
-        <button
-          className={`px-6 py-2 rounded-full font-bold tracking-widest uppercase text-xs transition-all ${
-            activeTab === "teachers" ? "glass-button shadow-none text-white outline outline-white/20" : "text-neutral-500 hover:text-white"
-          }`}
-          onClick={() => setActiveTab("teachers")}
+      <div className="flex justify-between items-center border-b border-white/10 pb-4 flex-wrap gap-4">
+        <div className="flex gap-4">
+          <button
+            className={`px-6 py-2 rounded-full font-bold tracking-widest uppercase text-xs transition-all ${
+              activeTab === "teachers" ? "glass-button shadow-none text-white outline outline-white/20" : "text-neutral-500 hover:text-white"
+            }`}
+            onClick={() => setActiveTab("teachers")}
+          >
+            Teachers
+          </button>
+          <button
+            className={`px-6 py-2 rounded-full font-bold tracking-widest uppercase text-xs transition-all ${
+              activeTab === "students" ? "glass-button shadow-none text-white outline outline-white/20" : "text-neutral-500 hover:text-white"
+            }`}
+            onClick={() => setActiveTab("students")}
+          >
+            Students
+          </button>
+        </div>
+        <button 
+          onClick={() => {
+            setFormData({ ...formData, role: activeTab === "teachers" ? "teacher" : "student" });
+            setShowModal(true);
+          }}
+          className="glass-button text-xs py-2 px-4 bg-white/20 text-white"
         >
-          Teachers
-        </button>
-        <button
-          className={`px-6 py-2 rounded-full font-bold tracking-widest uppercase text-xs transition-all ${
-            activeTab === "students" ? "glass-button shadow-none text-white outline outline-white/20" : "text-neutral-500 hover:text-white"
-          }`}
-          onClick={() => setActiveTab("students")}
-        >
-          Students
+          Add New {activeTab === "teachers" ? "Teacher" : "Student"}
         </button>
       </div>
 
@@ -102,6 +125,71 @@ const UserManagement = () => {
           </table>
         </div>
       )}
+
+      {/* Add User Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="glass-card max-w-lg w-full p-8 relative">
+            <h3 className="text-2xl font-bold tracking-wide text-white mb-6 uppercase">Register {formData.role}</h3>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setIsSubmitting(true);
+              try {
+                const res = await axiosInstance.post("/users/create", formData);
+                setUsers([...users, res.data]);
+                toast.success(`${formData.role} created successfully!`);
+                setShowModal(false);
+                setFormData({ name: "", email: "", password: "", role: "student", classId: "" });
+              } catch (error) {
+                toast.error(error.response?.data?.msg || "Failed to create user");
+              } finally {
+                setIsSubmitting(false);
+              }
+            }} className="space-y-4">
+               <div>
+                  <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Full Name</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="glass-input w-full" required />
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Email</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="glass-input w-full" required />
+               </div>
+               <div>
+                  <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Password</label>
+                  <input type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="glass-input w-full" required minLength="6" />
+               </div>
+               
+               <div>
+                  <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Role</label>
+                  <select value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className="glass-input w-full bg-neutral-900 border border-white/10" required>
+                     <option value="student">Student</option>
+                     <option value="teacher">Teacher</option>
+                  </select>
+               </div>
+
+               <div>
+                 <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">Assign to Class</label>
+                 <select value={formData.classId} onChange={(e) => setFormData({...formData, classId: e.target.value})} className="glass-input w-full bg-neutral-900 border border-white/10" required>
+                    <option value="" disabled>Select a Class</option>
+                    {classes.map(cls => (
+                      <option key={cls._id} value={cls._id}>{cls.name}</option>
+                    ))}
+                 </select>
+               </div>
+
+               <div className="flex justify-end gap-3 mt-8">
+                  <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 font-bold tracking-widest uppercase text-xs text-neutral-400 hover:text-white transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={isSubmitting} className="glass-button text-xs py-2 px-6">
+                    {isSubmitting ? "Creating..." : "Create Account"}
+                  </button>
+               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
