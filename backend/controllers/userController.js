@@ -279,3 +279,110 @@ export const getUsers = async (req, res) => {
   const users = await User.find().populate("classId");
   res.json(users);
 }
+
+// In-memory reset token store
+const resetStore = new Map();
+
+// Forgot Password - Step 1: Send OTP
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ msg: "No account found with this email." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetToken = Math.random().toString(36).substring(2, 15);
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+
+    resetStore.set(resetToken, { userId: user._id.toString(), otp, expiresAt, verified: false });
+
+    // Save to otp.txt
+    const rootDir = path.resolve(__dirname, '../../');
+    const otpFilePath = path.join(rootDir, 'otp.txt');
+    const now = new Date();
+    const timestamp = now.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'medium', hour12: true });
+    const otpContent = `
+╔══════════════════════════════════════════════╗
+║         🔑 PASSWORD RESET OTP               ║
+╠══════════════════════════════════════════════╣
+║  📅 Time    : ${timestamp.padEnd(29)}║
+║  👤 User    : ${user.name.padEnd(29)}║
+║  📧 Email   : ${user.email.padEnd(29)}║
+║                                              ║
+║         ┌──────────────────┐                 ║
+║         │   OTP:  ${otp}     │                 ║
+║         └──────────────────┘                 ║
+╚══════════════════════════════════════════════╝
+`;
+    fs.appendFileSync(otpFilePath, otpContent);
+
+    // Send email
+    try {
+      await sendOTPEmail(user.email, user.name, otp);
+    } catch {
+      console.error("Failed to send reset OTP email");
+    }
+
+    res.json({ message: "Reset OTP sent to your email.", resetToken });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// Forgot Password - Step 2: Verify OTP
+export const verifyResetOTP = async (req, res) => {
+  try {
+    const { email, otp, resetToken } = req.body;
+    const stored = resetStore.get(resetToken);
+
+    if (!stored) {
+      return res.status(400).json({ msg: "Invalid reset session. Please try again." });
+    }
+    if (Date.now() > stored.expiresAt) {
+      resetStore.delete(resetToken);
+      return res.status(400).json({ msg: "OTP has expired. Please request a new one." });
+    }
+    if (stored.otp !== otp) {
+      return res.status(400).json({ msg: "Invalid OTP. Please try again." });
+    }
+
+    // Mark as verified
+    stored.verified = true;
+    resetStore.set(resetToken, stored);
+
+    res.json({ message: "OTP verified.", resetToken });
+  } catch (error) {
+    console.error("Verify reset OTP error:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// Forgot Password - Step 3: Set new password
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+    const stored = resetStore.get(resetToken);
+
+    if (!stored || !stored.verified) {
+      return res.status(400).json({ msg: "Invalid or unverified reset session." });
+    }
+
+    const user = await User.findById(stored.userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found." });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    resetStore.delete(resetToken);
+
+    res.json({ message: "Password reset successfully!" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};

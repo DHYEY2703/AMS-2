@@ -26,6 +26,7 @@ import AuditLogs from "./pages/AuditLogs";
 import ParentDashboard from "./pages/ParentDashboard";
 import NetworkStatus from "./components/NetworkStatus";
 import { useThemeStore } from "./store/useThemeStore";
+import ForgotPassword from "./pages/ForgotPassword";
 
 const ProtectedRoute = ({ children }) => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -220,8 +221,17 @@ const AppContent = () => {
               }
             />
             <Route path="/login" element={authUser ? <Navigate to="/" /> : <Login />} />
+            <Route path="/forgot-password" element={authUser ? <Navigate to="/" /> : <ForgotPassword />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+
+          {/* Footer */}
+          <footer className="mt-auto pt-6 pb-4 text-center">
+            <p className="text-xs text-neutral-600 tracking-wide">
+              © {new Date().getFullYear()} All Rights Reserved by{" "}
+              <span className="text-neutral-400 font-semibold">Dhyey Barbhaya</span>
+            </p>
+          </footer>
         </div>
       </div>
     </div>

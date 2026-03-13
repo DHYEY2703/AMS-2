@@ -1,10 +1,12 @@
 import { useNavigate, NavLink } from "react-router-dom";
 import { Home, ClipboardList, Users, BookOpen, LogOut, ShieldAlert } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useLanguageStore } from "../store/useLanguageStore";
 
 const Sidebar = ({ user, isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
+  const { t } = useLanguageStore();
 
   const handleLogout = async () => {
     await logout();
@@ -30,7 +32,7 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
           <li>
             <NavLink to="/" end className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
               <Home className="mr-2 w-4 h-4" />
-              Dashboard
+              {t("dashboard")}
             </NavLink>
           </li>
         )}
@@ -40,7 +42,13 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
             <li>
               <NavLink to="/mark-attendance" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ClipboardList className="mr-2 w-4 h-4" />
-                Mark Attendance
+                {t("markAttendance")}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/attendance-report" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
+                <ClipboardList className="mr-2 w-4 h-4" />
+                {t("classReport")}
               </NavLink>
             </li>
             <li>
@@ -52,7 +60,7 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
             <li>
               <NavLink to="/leaves" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ClipboardList className="mr-2 w-4 h-4" />
-                Leave Requests
+                {t("leaveRequests")}
               </NavLink>
             </li>
           </>
@@ -62,7 +70,7 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
           <>
             <li>
               <NavLink to="/studentsdashboard" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
-                <Home className="mr-2 w-4 h-4" />
+              <Home className="mr-2 w-4 h-4" />
                 Dashboard
               </NavLink>
             </li>
@@ -75,13 +83,13 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
             <li>
               <NavLink to="/attendance-report" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ClipboardList className="mr-2 w-4 h-4" />
-                My Attendance
+                {t("myAttendance")}
               </NavLink>
             </li>
             <li>
               <NavLink to="/leaves" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ClipboardList className="mr-2 w-4 h-4" />
-                My Leaves
+                {t("myLeaves")}
               </NavLink>
             </li>
           </>
@@ -91,8 +99,8 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
           <>
             <li>
               <NavLink to="/parent-dashboard" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
-                <Home className="mr-2 w-4 h-4" />
-                Parent Portal
+              <Home className="mr-2 w-4 h-4" />
+                {t("parentPortal")}
               </NavLink>
             </li>
           </>
@@ -104,32 +112,32 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
             <li>
               <NavLink to="/user-management" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <Users className="mr-2 w-4 h-4" />
-                User Management
+                {t("userManagement")}
               </NavLink>
             </li>
             <li>
               <NavLink to="/classes" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <BookOpen className="mr-2 w-4 h-4" />
-                Class Management
+                {t("classManagement")}
               </NavLink>
             </li>
             <li>
               <NavLink to="/subjects" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <BookOpen className="mr-2 w-4 h-4" />
-                Subject Management
+                {t("subjectManagement")}
               </NavLink>
             </li>
             <li>
               <NavLink to="/leaves" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ClipboardList className="mr-2 w-4 h-4" />
-                Manage Leaves
+                {t("manageLeaves")}
               </NavLink>
             </li>
             <h3 className="text-xs font-bold text-neutral-400 mt-8 mb-3 tracking-wider uppercase">Security</h3>
             <li>
               <NavLink to="/audit-logs" className={navClass} onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}>
                 <ShieldAlert className="mr-2 w-4 h-4" />
-                Audit Logs
+                {t("auditLogs")}
               </NavLink>
             </li>
           </>
@@ -143,14 +151,14 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
           onClick={() => { if (window.innerWidth < 768) toggleSidebar(); }}
         >
           <Users className="mr-2 w-5 h-5" />
-          My Profile
+          {t("myProfile")}
         </NavLink>
         <button
           onClick={handleLogout}
           className="flex items-center p-3 rounded-2xl hover:bg-white/10 w-full transition-all text-neutral-300 hover:text-white mt-1"
         >
           <LogOut className="mr-2 w-5 h-5" />
-          Logout
+          {t("logout")}
         </button>
       </div>
     </aside>

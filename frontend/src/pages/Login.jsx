@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Loader2, ShieldCheck, ArrowLeft, Mail } from "lucide-react";
 
@@ -175,7 +175,11 @@ const Login = () => {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-neutral-400 font-medium">
+            <Link to="/forgot-password" className="block text-center text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2">
+              Forgot Password?
+            </Link>
+
+            <p className="mt-4 text-center text-sm text-neutral-400 font-medium">
               Contact Administrator to create a new account.
             </p>
           </>

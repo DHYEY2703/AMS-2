@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
+import { useLanguageStore } from "../store/useLanguageStore";
 
 const Leaves = () => {
   const { authUser } = useAuthStore();
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguageStore();
 
   // Form state
   const [startDate, setStartDate] = useState("");
@@ -68,13 +70,13 @@ const Leaves = () => {
   return (
     <div className="glass-card flex flex-col gap-6 max-w-6xl mx-auto w-full p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-        <h2 className="text-3xl font-bold tracking-wide text-white drop-shadow-md">Leave Management</h2>
+        <h2 className="text-3xl font-bold tracking-wide text-white drop-shadow-md">{t("leaveRequests")}</h2>
         {(authUser?.role === "student" || authUser?.role === "teacher") && (
           <button 
             onClick={() => setShowForm(!showForm)}
             className="glass-button"
           >
-            {showForm ? "Cancel" : "Apply for Leave"}
+            {showForm ? t("cancel") : t("applyLeave")}
           </button>
         )}
       </div>
@@ -83,16 +85,16 @@ const Leaves = () => {
         <form onSubmit={handleApplyLeave} className="glass-card bg-white/5 p-6 rounded-3xl mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Start Date</label>
+              <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">{t("startDate")}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="glass-input w-full" required />
             </div>
             <div>
-              <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">End Date</label>
+              <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">{t("endDate")}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="glass-input w-full" required />
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Reason</label>
+            <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">{t("reason")}</label>
             <textarea 
               value={reason} 
               onChange={(e) => setReason(e.target.value)} 
@@ -102,7 +104,7 @@ const Leaves = () => {
             />
           </div>
           <button type="submit" className="glass-button w-full sm:w-auto" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Leave Request"}
+            {isSubmitting ? t("loading") : t("submit")}
           </button>
         </form>
       )}
@@ -115,9 +117,9 @@ const Leaves = () => {
             <thead>
               <tr className="bg-neutral-800/60 uppercase text-xs tracking-widest text-neutral-400 border-b border-white/10">
                 {authUser?.role !== "student" && <th className="p-4 font-bold">User (Role)</th>}
-                <th className="p-4 font-bold">Dates</th>
-                <th className="p-4 font-bold">Reason</th>
-                <th className="p-4 font-bold">Status</th>
+                <th className="p-4 font-bold">{t("date")}</th>
+                <th className="p-4 font-bold">{t("reason")}</th>
+                <th className="p-4 font-bold">{t("status")}</th>
                 {authUser?.role !== "student" && <th className="p-4 font-bold text-right">Actions</th>}
               </tr>
             </thead>

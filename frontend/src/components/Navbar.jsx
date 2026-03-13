@@ -3,6 +3,7 @@ import { Menu, Search, Bell, Sun, Moon, X, CheckCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useThemeStore } from "../store/useThemeStore";
 import { useNotificationStore } from "../store/useNotificationStore";
+import { useLanguageStore } from "../store/useLanguageStore";
 import { axiosInstance } from "../lib/axios";
 
 const Navbar = ({ user, toggleSidebar }) => {
@@ -26,6 +27,9 @@ const Navbar = ({ user, toggleSidebar }) => {
   const searchRef = useRef(null);
   const notifRef = useRef(null);
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguageStore();
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef(null);
 
   // Fetch notifications on mount and poll every 30s
   useEffect(() => {
@@ -93,7 +97,7 @@ const Navbar = ({ user, toggleSidebar }) => {
           <Menu className="w-5 h-5 text-neutral-200" />
         </button>
         <div className="text-lg md:text-xl font-bold text-white hidden sm:block drop-shadow-md">
-          {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)} Dashboard
+          {user?.role === "student" ? t("studentDashboard") : user?.role === "teacher" ? t("teacherDashboard") : t("adminDashboard")}
         </div>
       </div>
 
@@ -200,6 +204,43 @@ const Navbar = ({ user, toggleSidebar }) => {
             <Moon className="w-5 h-5 text-blue-400" />
           )}
         </button>
+
+        {/* Language Selector */}
+        <div ref={langRef} className="relative">
+          <button
+            onClick={() => setLangOpen(!langOpen)}
+            className="p-2 rounded-xl hover:bg-white/10 transition-all text-xs font-bold text-neutral-300 uppercase tracking-wider min-w-[36px]"
+            aria-label="Change language"
+          >
+            {language === "en" ? "EN" : language === "hi" ? "हि" : "ગુ"}
+          </button>
+          {langOpen && (
+            <div className="absolute right-0 top-12 w-40 bg-neutral-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+              {[
+                { code: "en", label: "English", flag: "🇬🇧" },
+                { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
+                { code: "gu", label: "ગુજરાતી", flag: "🇮🇳" },
+              ].map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    setLanguage(lang.code);
+                    setLangOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                    language === lang.code
+                      ? "bg-white/10 text-white font-bold"
+                      : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <span>{lang.flag}</span>
+                  <span>{lang.label}</span>
+                  {language === lang.code && <span className="ml-auto text-emerald-400">✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Notification Bell */}
         <div ref={notifRef} className="relative">
