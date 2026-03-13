@@ -61,15 +61,37 @@ export const globalSearch = async (req, res) => {
         if (!q || q.length < 2) return res.json({ users: [], classes: [] });
 
         const regex = new RegExp(q, "i");
+        const requestingRole = req.user.role;
+        const requestingClassId = req.user.classId;
 
-        const users = await User.find({
+        // Build user search query
+        const userQuery = {
             $or: [{ name: regex }, { email: regex }],
-        })
-            .select("name email role profilePic")
+        };
+
+        if (requestingRole === "admin") {
+            // Admin sees everyone
+        } else {
+            // Students & Teachers: hide admins + only show same class
+            userQuery.role = { $ne: "admin" };
+            if (requestingClassId) {
+                userQuery.classId = requestingClassId;
+            }
+        }
+
+        const users = await User.find(userQuery)
+            .select("name email role profilePic classId")
+            .populate("classId", "name")
             .limit(10);
 
         const Class = (await import("../models/ClassModel.js")).default;
-        const classes = await Class.find({ name: regex }).select("name").limit(5);
+        
+        // Students & Teachers only see their own class
+        let classQuery = { name: regex };
+        if (requestingRole !== "admin" && requestingClassId) {
+            classQuery._id = requestingClassId;
+        }
+        const classes = await Class.find(classQuery).select("name").limit(5);
 
         res.json({ users, classes });
     } catch (error) {

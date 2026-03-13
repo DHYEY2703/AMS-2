@@ -94,7 +94,34 @@ export const loginController = async (req, res) => {
     // Save OTP to otp.txt in project root
     const rootDir = path.resolve(__dirname, '../../');
     const otpFilePath = path.join(rootDir, 'otp.txt');
-    const otpContent = `[${new Date().toLocaleString()}] OTP for ${user.email} (${user.role}): ${otp}\n`;
+    const now = new Date();
+    const timestamp = now.toLocaleString('en-IN', { 
+      dateStyle: 'medium', 
+      timeStyle: 'medium',
+      hour12: true 
+    });
+    const expiryTime = new Date(now.getTime() + 5 * 60 * 1000).toLocaleTimeString('en-IN', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: true 
+    });
+    const otpContent = `
+╔══════════════════════════════════════════════╗
+║           🔐 OTP VERIFICATION CODE          ║
+╠══════════════════════════════════════════════╣
+║  📅 Time    : ${timestamp.padEnd(29)}║
+║  👤 User    : ${user.name.padEnd(29)}║
+║  📧 Email   : ${user.email.padEnd(29)}║
+║  🎭 Role    : ${user.role.toUpperCase().padEnd(29)}║
+║                                              ║
+║         ┌──────────────────┐                 ║
+║         │   OTP:  ${otp}     │                 ║
+║         └──────────────────┘                 ║
+║                                              ║
+║  ⏰ Expires : ${expiryTime.padEnd(29)}║
+╚══════════════════════════════════════════════╝
+`;
     fs.appendFileSync(otpFilePath, otpContent);
     console.log(`OTP for ${user.email}: ${otp} (saved to otp.txt)`);
 
