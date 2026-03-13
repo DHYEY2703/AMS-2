@@ -126,7 +126,7 @@ const Leaves = () => {
                 <tr key={leave._id} className="transition-colors hover:bg-white-[0.02]">
                   {authUser?.role !== "student" && (
                     <td className="p-4 font-semibold text-neutral-200">
-                      {leave.userId?.name || "Unknown"} <span className="text-neutral-500 text-xs font-normal uppercase">({leave.role})</span>
+                      {leave.userId?.name || leave.studentId?.name || "Unknown"} <span className="text-neutral-500 text-xs font-normal uppercase">({leave.role || "student"})</span>
                     </td>
                   )}
                   <td className="p-4 text-neutral-300">

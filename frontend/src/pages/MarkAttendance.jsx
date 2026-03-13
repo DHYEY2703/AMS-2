@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { axiosInstance } from "../lib/axios";
+import { addToQueue, isOnline, getQueueCount } from "../lib/offlineQueue";
 import AttendanceTable from "../components/AttendanceTable";
 import ProgressBars from "../components/Progressbars";
 import ActivityFeed from "../components/ActivityFeed";
 import BarChart from "../components/BarChart";
+import toast from "react-hot-toast";
 
 const MarkAttendance = () => {
   const [classes, setClasses] = useState([]);
@@ -133,12 +135,31 @@ const MarkAttendance = () => {
         status,
       }));
 
-      await axiosInstance.post("/attendance/mark", {
+      const payload = {
         classId: selectedClass,
         subjectId: selectedSubject || undefined,
         date,
         attendance: attendanceArray,
-      });
+      };
+
+      if (!isOnline()) {
+        // Queue the request for later sync
+        const count = addToQueue({
+          method: 'POST',
+          url: '/attendance/mark',
+          data: payload,
+        });
+        toast.success(`📴 Saved offline! (${count} pending sync)`, { duration: 3000 });
+        setSuccessMessage("Attendance saved offline. It will sync automatically when you reconnect.");
+        setError(null);
+        setActivities((prev) => [
+          { message: `[OFFLINE] Attendance queued for class ${selectedClass} on ${date}` },
+          ...prev,
+        ]);
+        return;
+      }
+
+      await axiosInstance.post("/attendance/mark", payload);
 
       setSuccessMessage("Attendance marked successfully.");
       setError(null);
@@ -150,8 +171,25 @@ const MarkAttendance = () => {
         ...prev,
       ]);
     } catch (err) {
-      setError("Failed to submit attendance.");
-      setSuccessMessage(null);
+      // If network error, try to queue it offline
+      if (!err.response) {
+        const count = addToQueue({
+          method: 'POST',
+          url: '/attendance/mark',
+          data: {
+            classId: selectedClass,
+            subjectId: selectedSubject || undefined,
+            date,
+            attendance: Object.entries(attendanceData).map(([studentId, status]) => ({ studentId, status })),
+          },
+        });
+        toast.success(`📴 Network error! Saved offline. (${count} pending)`, { duration: 3000 });
+        setSuccessMessage("Attendance saved offline due to network error.");
+        setError(null);
+      } else {
+        setError("Failed to submit attendance.");
+        setSuccessMessage(null);
+      }
     }
   };
 

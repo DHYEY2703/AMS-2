@@ -24,6 +24,7 @@ import Leaves from "./pages/Leaves";
 import Timetable from "./pages/Timetable";
 import AuditLogs from "./pages/AuditLogs";
 import ParentDashboard from "./pages/ParentDashboard";
+import NetworkStatus from "./components/NetworkStatus";
 
 const ProtectedRoute = ({ children }) => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -219,6 +220,7 @@ const AppContent = () => {
 const App = () => (
   <Router>
     <AppContent />
+    <NetworkStatus />
     <Toaster />
   </Router>
 );
