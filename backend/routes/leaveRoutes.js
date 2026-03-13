@@ -4,7 +4,7 @@ import { applyLeave, getLeaves, updateLeaveStatus } from "../controllers/leaveCo
 
 const router = express.Router();
 
-router.post("/", protect(["student"]), applyLeave);
+router.post("/", protect(["student", "teacher"]), applyLeave);
 router.get("/", protect(["student", "teacher", "admin"]), getLeaves);
 router.put("/:id", protect(["teacher", "admin"]), updateLeaveStatus);
 

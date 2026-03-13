@@ -1,14 +1,17 @@
 import express from 'express';
 import protect from "../middleware/authMiddleware.js";
-import { getTeachers, getStudents, getParents, loginController, authCheck, getUsers, updateProfile, createUser } from "../controllers/userController.js";
+import { getTeachers, getStudents, getParents, loginController, verifyOTP, authCheck, getUsers, updateProfile, createUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
 // Admin creates user
 router.post("/create", protect(["admin"]), createUser);
 
-// Login
+// Login - Step 1: Credentials
 router.post("/login", loginController);
+
+// Login - Step 2: OTP Verification
+router.post("/verify-otp", verifyOTP);
 
 // Logout
 router.post("/logout", protect(), async (req, res) => {

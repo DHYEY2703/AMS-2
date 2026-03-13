@@ -83,19 +83,49 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    // Login
+    // Login - Step 1: Send credentials, receive OTP challenge
     login: async (data) => {
         set({ isLoggingIn: true });
         try {
             const res = await axiosInstance.post("/users/login", data);
+            
+            if (res.data.requireOTP) {
+                // OTP required — don't set authUser yet
+                set({ isLoggingIn: false });
+                return res.data; // { requireOTP, userId, email, message }
+            }
+
+            // Fallback: direct login (shouldn't happen with 2FA)
             if (res.data.token) {
                 localStorage.setItem("token", res.data.token);
             }
             set({ authUser: res.data.user || res.data });
             toast.success("Logged In Successfully");
+            return res.data;
         } catch (error) {
             console.error("Login error:", error);
-            toast.error(error?.response?.data?.message || "Login failed");
+            toast.error(error?.response?.data?.msg || "Login failed");
+            throw error;
+        } finally {
+            set({ isLoggingIn: false });
+        }
+    },
+
+    // Login - Step 2: Verify OTP
+    verifyOTP: async ({ userId, otp }) => {
+        set({ isLoggingIn: true });
+        try {
+            const res = await axiosInstance.post("/users/verify-otp", { userId, otp });
+            if (res.data.token) {
+                localStorage.setItem("token", res.data.token);
+            }
+            set({ authUser: res.data.user || res.data });
+            toast.success("Login Successful! ✅");
+            return res.data;
+        } catch (error) {
+            console.error("OTP verification error:", error);
+            toast.error(error?.response?.data?.msg || "OTP verification failed");
+            throw error;
         } finally {
             set({ isLoggingIn: false });
         }

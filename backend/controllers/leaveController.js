@@ -1,4 +1,6 @@
 import Leave from "../models/LeaveModel.js";
+import User from "../models/UserModel.js";
+import { createNotification } from "./notificationController.js";
 
 // Apply for leave
 export const applyLeave = async (req, res) => {
@@ -27,6 +29,23 @@ export const applyLeave = async (req, res) => {
 
         const leave = new Leave(leaveParams);
         await leave.save();
+
+        // Notify all admins about the new leave request
+        try {
+            const admins = await User.find({ role: "admin" });
+            for (const admin of admins) {
+                await createNotification(
+                    admin._id,
+                    "leave_request",
+                    `New Leave Request`,
+                    `${req.user.name} (${role}) has requested leave from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}`,
+                    "/leaves"
+                );
+            }
+        } catch (e) {
+            console.error("Failed to create leave notification:", e);
+        }
+
         res.status(201).json(leave);
     } catch (error) {
         console.error("Error applying for leave:", error);
@@ -82,6 +101,19 @@ export const updateLeaveStatus = async (req, res) => {
 
         leave.status = status;
         await leave.save();
+
+        // Notify the user about the decision
+        try {
+            await createNotification(
+                leave.userId,
+                "leave_status",
+                `Leave ${status}`,
+                `Your leave request has been ${status.toLowerCase()} by the admin.`,
+                "/leaves"
+            );
+        } catch (e) {
+            console.error("Failed to create status notification:", e);
+        }
 
         res.json(leave);
     } catch (error) {

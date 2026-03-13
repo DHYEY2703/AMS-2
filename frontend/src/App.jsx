@@ -25,6 +25,7 @@ import Timetable from "./pages/Timetable";
 import AuditLogs from "./pages/AuditLogs";
 import ParentDashboard from "./pages/ParentDashboard";
 import NetworkStatus from "./components/NetworkStatus";
+import { useThemeStore } from "./store/useThemeStore";
 
 const ProtectedRoute = ({ children }) => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -40,10 +41,20 @@ const AppContent = () => {
   const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+  const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  // Apply theme class to body
+  useEffect(() => {
+    if (theme === "light") {
+      document.body.classList.add("light");
+    } else {
+      document.body.classList.remove("light");
+    }
+  }, [theme]);
 
   useEffect(() => {
     if (window.innerWidth < 768) {

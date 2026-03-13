@@ -32,4 +32,82 @@ body {
   @apply bg-neutral-950 text-neutral-100;
   background-image: radial-gradient(circle at top right, #1a1a1a, #0a0a0a);
   background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* ========== LIGHT THEME OVERRIDES ========== */
+body.light {
+  @apply bg-gray-50 text-gray-900;
+  background-image: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+}
+
+body.light .glass-panel {
+  @apply bg-white/80 border-gray-200 shadow-[0_4px_16px_rgba(0,0,0,0.08)];
+  backdrop-filter: blur(20px);
+}
+
+body.light .glass-card {
+  @apply bg-white/80 border-gray-200 shadow-[0_2px_12px_rgba(0,0,0,0.06)] text-gray-900;
+  backdrop-filter: blur(16px);
+}
+
+body.light .glass-button {
+  @apply bg-gray-900 text-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:bg-black;
+}
+
+body.light .glass-input {
+  @apply bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-gray-500 focus:ring-gray-400;
+}
+
+body.light .text-white {
+  color: #111827 !important;
+}
+
+body.light .text-neutral-100,
+body.light .text-neutral-200 {
+  color: #1f2937 !important;
+}
+
+body.light .text-neutral-300 {
+  color: #374151 !important;
+}
+
+body.light .text-neutral-400 {
+  color: #6b7280 !important;
+}
+
+body.light .text-neutral-500 {
+  color: #9ca3af !important;
+}
+
+body.light table {
+  @apply bg-white/80;
+}
+
+body.light thead tr {
+  @apply bg-gray-100/80 text-gray-600;
+}
+
+body.light tbody tr {
+  @apply border-gray-200;
+}
+
+body.light .bg-neutral-900\/40,
+body.light .bg-neutral-800\/40,
+body.light .bg-neutral-900\/95 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.light .border-white\/10,
+body.light .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light .divide-white\/5 > * + * {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light select option {
+  @apply bg-white text-gray-900;
+}
+

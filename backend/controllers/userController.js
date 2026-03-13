@@ -2,6 +2,16 @@ import User from "../models/UserModel.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AuditLog from "../models/AuditLogModel.js";
+import { sendOTPEmail } from "../lib/mailService.js";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// In-memory OTP store (userId -> { otp, expiresAt })
+const otpStore = new Map();
 
 // Controller to update a user's profile
 export const updateProfile = async (req, res) => {
@@ -65,19 +75,91 @@ export const getParents = async (req, res) => {
   }
 };
 
-//Login controller 
+//Login controller - Step 1: Verify credentials and send OTP
 export const loginController = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email }).populate("classId");
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(400).json({ msg: "Invalid credentials" });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).populate("classId");
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+    // Store OTP in memory
+    otpStore.set(user._id.toString(), { otp, expiresAt });
+
+    // Save OTP to otp.txt in project root
+    const rootDir = path.resolve(__dirname, '../../');
+    const otpFilePath = path.join(rootDir, 'otp.txt');
+    const otpContent = `[${new Date().toLocaleString()}] OTP for ${user.email} (${user.role}): ${otp}\n`;
+    fs.appendFileSync(otpFilePath, otpContent);
+    console.log(`OTP for ${user.email}: ${otp} (saved to otp.txt)`);
+
+    // Send OTP via email
+    try {
+      await sendOTPEmail(user.email, user.name, otp);
+    } catch (emailErr) {
+      console.error("Failed to send OTP email:", emailErr);
+      // Don't fail login if email fails — OTP is in otp.txt
+    }
+
+    // Return userId (no token yet — OTP required)
+    res.json({
+      requireOTP: true,
+      userId: user._id,
+      email: user.email,
+      message: "OTP sent to your email. Check your inbox (and otp.txt).",
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ msg: "Server error during login" });
   }
+};
 
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
+// Login controller - Step 2: Verify OTP and issue token
+export const verifyOTP = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
 
-  res.json({ token, user });
+    if (!userId || !otp) {
+      return res.status(400).json({ msg: "User ID and OTP are required" });
+    }
+
+    const stored = otpStore.get(userId);
+
+    if (!stored) {
+      return res.status(400).json({ msg: "No OTP found. Please login again." });
+    }
+
+    if (Date.now() > stored.expiresAt) {
+      otpStore.delete(userId);
+      return res.status(400).json({ msg: "OTP has expired. Please login again." });
+    }
+
+    if (stored.otp !== otp) {
+      return res.status(400).json({ msg: "Invalid OTP. Please try again." });
+    }
+
+    // OTP verified! Delete it and issue JWT
+    otpStore.delete(userId);
+
+    const user = await User.findById(userId).populate("classId").select("-password");
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.json({ token, user });
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    res.status(500).json({ msg: "Server error during OTP verification" });
+  }
 };
 
 // Create User Controller (Admin Only)
